@@ -1,0 +1,64 @@
+service: serverless-coginito
+
+plugins:
+  - serverless-pseudo-parameters
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: dev
+  region: ap-northeast-1
+
+functions:
+  index:
+    handler: index.handler
+    events:
+      - http:
+          path: demo/index
+          method: get
+          authorizer:
+            arn: "arn:aws:cognito-idp:${self:provider.region}:#{AWS::AccountId}:userpool/#{UserPool}"
+          cors: true
+
+resources:
+  Resources:
+    UserPool:
+      Type: "AWS::Cognito::UserPool"
+      Properties:
+        Schema:
+          - Name: "email"
+            StringAttributeConstraints:
+              MinLength: "0"
+              MaxLength: "2048"
+            Required: true
+            AttributeDataType: "String"
+            Mutable: true
+        AliasAttributes: ["email"]
+        AutoVerifiedAttributes: ["email"]
+        EmailVerificationSubject: "Your verification code"
+        EmailVerificationMessage: "Your confirmation code is {####}."
+        MfaConfiguration: "OFF"
+        UserPoolName:
+          Ref: AWS::StackName
+        Policies:
+          PasswordPolicy:
+            RequireLowercase: false
+            RequireSymbols: false
+            RequireNumbers: false
+            MinimumLength: 6
+            RequireUppercase: false
+    UserPoolClient:
+      Type: "AWS::Cognito::UserPoolClient"
+      Properties:
+        ClientName:
+          Ref: AWS::StackName
+        GenerateSecret: false
+        UserPoolId:
+          Ref: UserPool
+Outputs:
+  UserPoolId:
+    Value:
+      Ref: UserPool
+  UserPoolClientId:
+    Value:
+      Ref: UserPoolClient

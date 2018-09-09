@@ -1,0 +1,10 @@
+{
+  "name": "serverless",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "serverless-pseudo-parameters": "^2.2.0"
+  }
+}
