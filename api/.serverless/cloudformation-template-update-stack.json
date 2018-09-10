@@ -66,6 +66,18 @@
                       "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-index:*:*"
                     }
                   ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteItem"
+                  ],
+                  "Resource": "arn:aws:dynamodb:ap-northeast-1:*:table/serverless-api-dev"
                 }
               ]
             }
@@ -92,7 +104,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/serverless-api/dev/1536547592914-2018-09-10T02:46:32.914Z/serverless-api.zip"
+          "S3Key": "serverless/serverless-api/dev/1536555692818-2018-09-10T05:01:32.818Z/serverless-api.zip"
         },
         "FunctionName": "serverless-api-dev-index",
         "Handler": "index.handler",
@@ -104,21 +116,26 @@
           ]
         },
         "Runtime": "nodejs6.10",
-        "Timeout": 6
+        "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "DYNAMODB_TABLE": "serverless-api-dev"
+          }
+        }
       },
       "DependsOn": [
         "IndexLogGroup",
         "IamRoleLambdaExecution"
       ]
     },
-    "IndexLambdaVersionYjhLH6Ck1BNW2jiHeAl8cuLW3hTaLwP1OEm5pIPE": {
+    "IndexLambdaVersiondWm3saC48xA2pqJ66el0KbUuHmHTCfq75ttWu3nt1H8": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "IndexLambdaFunction"
         },
-        "CodeSha256": "xECOTf+AsohOoukTJnxJEQwwZeJxdR70FkbdNmf2Rbw="
+        "CodeSha256": "3GZY1ktyJjLnjmYENYOVXeflRxx/fxH2HjRWGzYTKqA="
       }
     },
     "ApiGatewayRestApi": {
@@ -270,7 +287,7 @@
         ]
       }
     },
-    "ApiGatewayDeployment1536547592927": {
+    "ApiGatewayDeployment1536555692829": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -329,6 +346,28 @@
           ]
         }
       }
+    },
+    "usersTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": "usersTable",
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "email",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "email",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 1,
+          "WriteCapacityUnits": 1
+        }
+      }
     }
   },
   "Outputs": {
@@ -340,7 +379,7 @@
     "IndexLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "IndexLambdaVersionYjhLH6Ck1BNW2jiHeAl8cuLW3hTaLwP1OEm5pIPE"
+        "Ref": "IndexLambdaVersiondWm3saC48xA2pqJ66el0KbUuHmHTCfq75ttWu3nt1H8"
       }
     },
     "ServiceEndpoint": {
