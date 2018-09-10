@@ -36,6 +36,16 @@ functions:
             arn: "arn:aws:cognito-idp:${self:provider.region}:#{AWS::AccountId}:userpool/${cf:serverless-cognito-dev.UserPoolId}"
           cors: true
 
+  process:
+    handler: process.handler
+    events:
+      - stream:
+          type: kinesis
+          arn:
+            Fn::GetAtt: [KinesisStream, Arn]
+          batchSize: 100
+          startingPosition: TRIM_HORIZON
+
   iot:
     handler: ios.handler
     events:
@@ -44,6 +54,11 @@ functions:
 
 resources:
   Resources:
+    KinesisStream:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: ${self:service}-stream
+        ShardCount: 1
     usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
