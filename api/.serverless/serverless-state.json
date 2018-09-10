@@ -48,12 +48,6 @@
               "LogGroupName": "/aws/lambda/serverless-api-dev-process"
             }
           },
-          "IotLogGroup": {
-            "Type": "AWS::Logs::LogGroup",
-            "Properties": {
-              "LogGroupName": "/aws/lambda/serverless-api-dev-iot"
-            }
-          },
           "IamRoleLambdaExecution": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -99,9 +93,6 @@
                           },
                           {
                             "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-process:*"
-                          },
-                          {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-iot:*"
                           }
                         ]
                       },
@@ -116,9 +107,6 @@
                           },
                           {
                             "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-process:*:*"
-                          },
-                          {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-iot:*:*"
                           }
                         ]
                       },
@@ -167,7 +155,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/serverless-api/dev/1536559191196-2018-09-10T05:59:51.196Z/serverless-api.zip"
+                "S3Key": "serverless/serverless-api/dev/1536569592521-2018-09-10T08:53:12.521Z/serverless-api.zip"
               },
               "FunctionName": "serverless-api-dev-index",
               "Handler": "index.handler",
@@ -191,14 +179,14 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "IndexLambdaVersion0cOGYgT0rZtOviyYSqXxrCsmsamy0jtxdAMIE7Bdvc": {
+          "IndexLambdaVersionj2PlV70Ued66TFGZK2FItJCLhCnD1lZ1YfXpFE": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "IndexLambdaFunction"
               },
-              "CodeSha256": "8YUmXl2ecICpUup0v6UAv954Psd0oaEljIiHIH/q0zE="
+              "CodeSha256": "OjyfzF4oou8ZVgwqL9m7GhS75uSqBn7DzzajVQ0gCjc="
             }
           },
           "ProcessLambdaFunction": {
@@ -208,7 +196,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/serverless-api/dev/1536559191196-2018-09-10T05:59:51.196Z/serverless-api.zip"
+                "S3Key": "serverless/serverless-api/dev/1536569592521-2018-09-10T08:53:12.521Z/serverless-api.zip"
               },
               "FunctionName": "serverless-api-dev-process",
               "Handler": "process.handler",
@@ -232,55 +220,14 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "ProcessLambdaVersion5aioLIJBzda3oRTDFHmRjBJA47mMA4BF5w2QwUKb4": {
+          "ProcessLambdaVersion2vANjooNP7cN7u3AkxSOMeOcoiMsXFHu9iXkj5Cogk": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ProcessLambdaFunction"
               },
-              "CodeSha256": "8YUmXl2ecICpUup0v6UAv954Psd0oaEljIiHIH/q0zE="
-            }
-          },
-          "IotLambdaFunction": {
-            "Type": "AWS::Lambda::Function",
-            "Properties": {
-              "Code": {
-                "S3Bucket": {
-                  "Ref": "ServerlessDeploymentBucket"
-                },
-                "S3Key": "serverless/serverless-api/dev/1536559191196-2018-09-10T05:59:51.196Z/serverless-api.zip"
-              },
-              "FunctionName": "serverless-api-dev-iot",
-              "Handler": "ios.handler",
-              "MemorySize": 1024,
-              "Role": {
-                "Fn::GetAtt": [
-                  "IamRoleLambdaExecution",
-                  "Arn"
-                ]
-              },
-              "Runtime": "nodejs6.10",
-              "Timeout": 6,
-              "Environment": {
-                "Variables": {
-                  "DYNAMODB_TABLE": "serverless-api-dev"
-                }
-              }
-            },
-            "DependsOn": [
-              "IotLogGroup",
-              "IamRoleLambdaExecution"
-            ]
-          },
-          "IotLambdaVersioni2cjLIOA358jtvuh9i4ZVSlAjG6wCOT8PJzdlRbEg": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "IotLambdaFunction"
-              },
-              "CodeSha256": "8YUmXl2ecICpUup0v6UAv954Psd0oaEljIiHIH/q0zE="
+              "CodeSha256": "OjyfzF4oou8ZVgwqL9m7GhS75uSqBn7DzzajVQ0gCjc="
             }
           },
           "ApiGatewayRestApi": {
@@ -432,7 +379,7 @@
               ]
             }
           },
-          "ApiGatewayDeployment1536559191211": {
+          "ApiGatewayDeployment1536569592540": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -496,7 +443,7 @@
             "Type": "AWS::Lambda::EventSourceMapping",
             "DependsOn": "IamRoleLambdaExecution",
             "Properties": {
-              "BatchSize": 100,
+              "BatchSize": 10,
               "EventSourceArn": {
                 "Fn::GetAtt": [
                   "KinesisStream",
@@ -513,69 +460,48 @@
               "Enabled": "True"
             }
           },
-          "IotIotTopicRule1": {
+          "WriteKinesisRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "iot.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "ManagedPolicyArns": [
+                "arn:aws:iam::aws:policy/AmazonKinesisFullAccess"
+              ]
+            }
+          },
+          "TopicRule": {
             "Type": "AWS::IoT::TopicRule",
             "Properties": {
               "TopicRulePayload": {
-                "RuleDisabled": "false",
-                "Sql": "SELECT * FROM 'topic'",
+                "RuleDisabled": false,
+                "Sql": "SELECT * FROM 'myTopic'",
                 "Actions": [
                   {
-                    "Lambda": {
-                      "FunctionArn": {
+                    "Kinesis": {
+                      "RoleArn": {
                         "Fn::GetAtt": [
-                          "IotLambdaFunction",
+                          "WriteKinesisRole",
                           "Arn"
                         ]
-                      }
+                      },
+                      "StreamName": "serverless-api-stream"
                     }
                   }
-                ]
-              }
-            }
-          },
-          "IotLambdaPermissionIotTopicRule1": {
-            "Type": "AWS::Lambda::Permission",
-            "Properties": {
-              "FunctionName": {
-                "Fn::GetAtt": [
-                  "IotLambdaFunction",
-                  "Arn"
-                ]
-              },
-              "Action": "lambda:InvokeFunction",
-              "Principal": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "iot.",
-                    {
-                      "Ref": "AWS::URLSuffix"
-                    }
-                  ]
-                ]
-              },
-              "SourceArn": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      "Ref": "AWS::Partition"
-                    },
-                    ":iot:",
-                    {
-                      "Ref": "AWS::Region"
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId"
-                    },
-                    ":rule/",
-                    {
-                      "Ref": "IotIotTopicRule1"
-                    }
-                  ]
                 ]
               }
             }
@@ -590,16 +516,16 @@
           "usersTable": {
             "Type": "AWS::DynamoDB::Table",
             "Properties": {
-              "TableName": "usersTable",
+              "TableName": "serverless-api-dev",
               "AttributeDefinitions": [
                 {
-                  "AttributeName": "email",
+                  "AttributeName": "id",
                   "AttributeType": "S"
                 }
               ],
               "KeySchema": [
                 {
-                  "AttributeName": "email",
+                  "AttributeName": "id",
                   "KeyType": "HASH"
                 }
               ],
@@ -619,19 +545,13 @@
           "IndexLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "IndexLambdaVersion0cOGYgT0rZtOviyYSqXxrCsmsamy0jtxdAMIE7Bdvc"
+              "Ref": "IndexLambdaVersionj2PlV70Ued66TFGZK2FItJCLhCnD1lZ1YfXpFE"
             }
           },
           "ProcessLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ProcessLambdaVersion5aioLIJBzda3oRTDFHmRjBJA47mMA4BF5w2QwUKb4"
-            }
-          },
-          "IotLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "IotLambdaVersioni2cjLIOA358jtvuh9i4ZVSlAjG6wCOT8PJzdlRbEg"
+              "Ref": "ProcessLambdaVersion2vANjooNP7cN7u3AkxSOMeOcoiMsXFHu9iXkj5Cogk"
             }
           },
           "ServiceEndpoint": {
@@ -730,9 +650,7 @@
               "type": "kinesis",
               "arn": {
                 "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"IamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][3][\"Resource\"][0]"
-              },
-              "batchSize": 100,
-              "startingPosition": "TRIM_HORIZON"
+              }
             }
           }
         ],
@@ -742,26 +660,56 @@
         "timeout": 6,
         "runtime": "nodejs6.10",
         "vpc": {}
-      },
-      "iot": {
-        "handler": "ios.handler",
-        "events": [
-          {
-            "iot": {
-              "sql": "SELECT * FROM 'topic'"
-            }
-          }
-        ],
-        "name": "serverless-api-dev-iot",
-        "package": {},
-        "memory": 1024,
-        "timeout": 6,
-        "runtime": "nodejs6.10",
-        "vpc": {}
       }
     },
     "resources": {
       "Resources": {
+        "WriteKinesisRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "iot.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "ManagedPolicyArns": [
+              "arn:aws:iam::aws:policy/AmazonKinesisFullAccess"
+            ]
+          }
+        },
+        "TopicRule": {
+          "Type": "AWS::IoT::TopicRule",
+          "Properties": {
+            "TopicRulePayload": {
+              "RuleDisabled": false,
+              "Sql": "SELECT * FROM 'myTopic'",
+              "Actions": [
+                {
+                  "Kinesis": {
+                    "RoleArn": {
+                      "Fn::GetAtt": [
+                        "WriteKinesisRole",
+                        "Arn"
+                      ]
+                    },
+                    "StreamName": "serverless-api-stream"
+                  }
+                }
+              ]
+            }
+          }
+        },
         "KinesisStream": {
           "Type": "AWS::Kinesis::Stream",
           "Properties": {
@@ -772,16 +720,16 @@
         "usersTable": {
           "Type": "AWS::DynamoDB::Table",
           "Properties": {
-            "TableName": "usersTable",
+            "TableName": "serverless-api-dev",
             "AttributeDefinitions": [
               {
-                "AttributeName": "email",
+                "AttributeName": "id",
                 "AttributeType": "S"
               }
             ],
             "KeySchema": [
               {
-                "AttributeName": "email",
+                "AttributeName": "id",
                 "KeyType": "HASH"
               }
             ],
@@ -797,7 +745,7 @@
     "artifact": "/Users/musashi.sakamoto/Desktop/serverless-template/api/.serverless/serverless-api.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/serverless-api/dev/1536559191196-2018-09-10T05:59:51.196Z",
+    "artifactDirectoryName": "serverless/serverless-api/dev/1536569592521-2018-09-10T08:53:12.521Z",
     "artifact": "serverless-api.zip"
   }
 }

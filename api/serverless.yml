@@ -43,17 +43,38 @@ functions:
           type: kinesis
           arn:
             Fn::GetAtt: [KinesisStream, Arn]
-          batchSize: 100
-          startingPosition: TRIM_HORIZON
-
-  iot:
-    handler: ios.handler
-    events:
-      - iot:
-          sql: "SELECT * FROM 'topic'"
 
 resources:
   Resources:
+    WriteKinesisRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            -
+              Effect: "Allow"
+              Principal:
+                Service:
+                  - "iot.amazonaws.com"
+              Action:
+                - "sts:AssumeRole"
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonKinesisFullAccess
+    TopicRule:
+      Type: AWS::IoT::TopicRule
+      Properties:
+        TopicRulePayload:
+          RuleDisabled: false
+          Sql: "SELECT * FROM 'myTopic'"
+          Actions:
+            -
+              Kinesis:
+                RoleArn:
+                  Fn::GetAtt:
+                    - "WriteKinesisRole"
+                    - "Arn"
+                StreamName: ${self:service}-stream
     KinesisStream:
       Type: AWS::Kinesis::Stream
       Properties:
@@ -62,12 +83,12 @@ resources:
     usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: usersTable
+        TableName: ${self:service}-${opt:stage, self:provider.stage}
         AttributeDefinitions:
-          - AttributeName: email
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          - AttributeName: email
+          - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
