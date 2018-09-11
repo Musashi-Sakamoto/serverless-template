@@ -11,7 +11,8 @@
       "name": "aws",
       "runtime": "nodejs6.10",
       "environment": {
-        "DYNAMODB_TABLE": "serverless-api-dev"
+        "DYNAMODB_TABLE": "serverless-api-dev",
+        "IOT_ENDPOINT_HOST": "a1oyblg053arn8.iot.ap-northeast-1.amazonaws.com"
       },
       "iamRoleStatements": [
         {
@@ -25,6 +26,16 @@
             "dynamodb:DeleteItem"
           ],
           "Resource": "arn:aws:dynamodb:ap-northeast-1:*:table/serverless-api-dev"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "iot:Connect",
+            "iot:Publish",
+            "iot:Subscribe",
+            "iot:Receive"
+          ],
+          "Resource": "*"
         }
       ],
       "versionFunctions": true,
@@ -40,6 +51,18 @@
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
               "LogGroupName": "/aws/lambda/serverless-api-dev-index"
+            }
+          },
+          "SignLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/serverless-api-dev-sign"
+            }
+          },
+          "PublishLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/serverless-api-dev-publish"
             }
           },
           "ProcessLogGroup": {
@@ -92,6 +115,12 @@
                             "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-index:*"
                           },
                           {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-sign:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-publish:*"
+                          },
+                          {
                             "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-process:*"
                           }
                         ]
@@ -106,12 +135,38 @@
                             "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-index:*:*"
                           },
                           {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-sign:*:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-publish:*:*"
+                          },
+                          {
                             "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-api-dev-process:*:*"
                           }
                         ]
                       },
                       {
                         "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][0]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][1]"
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "kinesis:GetRecords",
+                          "kinesis:GetShardIterator",
+                          "kinesis:DescribeStream",
+                          "kinesis:ListStreams"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::GetAtt": [
+                              "KinesisStream",
+                              "Arn"
+                            ]
+                          }
+                        ]
                       },
                       {
                         "Effect": "Allow",
@@ -155,7 +210,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/serverless-api/dev/1536569592521-2018-09-10T08:53:12.521Z/serverless-api.zip"
+                "S3Key": "serverless/serverless-api/dev/1536654814335-2018-09-11T08:33:34.335Z/serverless-api.zip"
               },
               "FunctionName": "serverless-api-dev-index",
               "Handler": "index.handler",
@@ -170,7 +225,8 @@
               "Timeout": 6,
               "Environment": {
                 "Variables": {
-                  "DYNAMODB_TABLE": "serverless-api-dev"
+                  "DYNAMODB_TABLE": "serverless-api-dev",
+                  "IOT_ENDPOINT_HOST": "a1oyblg053arn8.iot.ap-northeast-1.amazonaws.com"
                 }
               }
             },
@@ -179,14 +235,99 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "IndexLambdaVersionj2PlV70Ued66TFGZK2FItJCLhCnD1lZ1YfXpFE": {
+          "IndexLambdaVersionKFwajSpS6ooXfddPKJoETr0NwgS0pH5eMFMtzmkXTg": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "IndexLambdaFunction"
               },
-              "CodeSha256": "OjyfzF4oou8ZVgwqL9m7GhS75uSqBn7DzzajVQ0gCjc="
+              "CodeSha256": "xKQ8SphaSLgQQ+/PhyjJKXuJCYbFqGbRJVrjK3FGNj0="
+            }
+          },
+          "SignLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/serverless-api/dev/1536654814335-2018-09-11T08:33:34.335Z/serverless-api.zip"
+              },
+              "FunctionName": "serverless-api-dev-sign",
+              "Handler": "sign.handler",
+              "MemorySize": 1024,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "nodejs6.10",
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DYNAMODB_TABLE": "serverless-api-dev",
+                  "IOT_ENDPOINT_HOST": "a1oyblg053arn8.iot.ap-northeast-1.amazonaws.com",
+                  "IOT_AWS_REGION": "ap-northeast-1"
+                }
+              }
+            },
+            "DependsOn": [
+              "SignLogGroup",
+              "IamRoleLambdaExecution"
+            ]
+          },
+          "SignLambdaVersionTTsVvRn5jD2kSe4w7bczJ3LssUpdCr1rigRIRosYkKg": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "SignLambdaFunction"
+              },
+              "CodeSha256": "xKQ8SphaSLgQQ+/PhyjJKXuJCYbFqGbRJVrjK3FGNj0="
+            }
+          },
+          "PublishLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/serverless-api/dev/1536654814335-2018-09-11T08:33:34.335Z/serverless-api.zip"
+              },
+              "FunctionName": "serverless-api-dev-publish",
+              "Handler": "publish.handler",
+              "MemorySize": 1024,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "nodejs6.10",
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DYNAMODB_TABLE": "serverless-api-dev",
+                  "IOT_ENDPOINT_HOST": "a1oyblg053arn8.iot.ap-northeast-1.amazonaws.com"
+                }
+              }
+            },
+            "DependsOn": [
+              "PublishLogGroup",
+              "IamRoleLambdaExecution"
+            ]
+          },
+          "PublishLambdaVersionPSpx3E7LCS6c8SJsa3oqpcyBCuGO2F3Ix0UFPC8to": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "PublishLambdaFunction"
+              },
+              "CodeSha256": "xKQ8SphaSLgQQ+/PhyjJKXuJCYbFqGbRJVrjK3FGNj0="
             }
           },
           "ProcessLambdaFunction": {
@@ -196,7 +337,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/serverless-api/dev/1536569592521-2018-09-10T08:53:12.521Z/serverless-api.zip"
+                "S3Key": "serverless/serverless-api/dev/1536654814335-2018-09-11T08:33:34.335Z/serverless-api.zip"
               },
               "FunctionName": "serverless-api-dev-process",
               "Handler": "process.handler",
@@ -211,7 +352,8 @@
               "Timeout": 6,
               "Environment": {
                 "Variables": {
-                  "DYNAMODB_TABLE": "serverless-api-dev"
+                  "DYNAMODB_TABLE": "serverless-api-dev",
+                  "IOT_ENDPOINT_HOST": "a1oyblg053arn8.iot.ap-northeast-1.amazonaws.com"
                 }
               }
             },
@@ -220,14 +362,14 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "ProcessLambdaVersion2vANjooNP7cN7u3AkxSOMeOcoiMsXFHu9iXkj5Cogk": {
+          "ProcessLambdaVersionefFdaub45s2GORzBSynsfQEPfDhIzNodWi302iD3k": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ProcessLambdaFunction"
               },
-              "CodeSha256": "OjyfzF4oou8ZVgwqL9m7GhS75uSqBn7DzzajVQ0gCjc="
+              "CodeSha256": "xKQ8SphaSLgQQ+/PhyjJKXuJCYbFqGbRJVrjK3FGNj0="
             }
           },
           "ApiGatewayRestApi": {
@@ -263,6 +405,18 @@
                 "Ref": "ApiGatewayResourceDemo"
               },
               "PathPart": "index",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceDemoSign": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceDemo"
+              },
+              "PathPart": "sign",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
@@ -309,6 +463,53 @@
               },
               "ResourceId": {
                 "Ref": "ApiGatewayResourceDemoIndex"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodDemoSignOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true,
+                    "method.response.header.Access-Control-Allow-Credentials": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'",
+                      "method.response.header.Access-Control-Allow-Credentials": "'false'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceDemoSign"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -362,6 +563,53 @@
             },
             "DependsOn": "1Underscore1NS2V20GyApiGatewayAuthorizer"
           },
+          "ApiGatewayMethodDemoSignGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceDemoSign"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "COGNITO_USER_POOLS",
+              "AuthorizerId": {
+                "Ref": "1Underscore1NS2V20GyApiGatewayAuthorizer"
+              },
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "SignLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": "1Underscore1NS2V20GyApiGatewayAuthorizer"
+          },
           "1Underscore1NS2V20GyApiGatewayAuthorizer": {
             "Type": "AWS::ApiGateway::Authorizer",
             "Properties": {
@@ -379,7 +627,7 @@
               ]
             }
           },
-          "ApiGatewayDeployment1536569592540": {
+          "ApiGatewayDeployment1536654814361": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -389,7 +637,9 @@
             },
             "DependsOn": [
               "ApiGatewayMethodDemoIndexOptions",
-              "ApiGatewayMethodDemoIndexGet"
+              "ApiGatewayMethodDemoSignOptions",
+              "ApiGatewayMethodDemoIndexGet",
+              "ApiGatewayMethodDemoSignGet"
             ]
           },
           "IndexLambdaPermissionApiGateway": {
@@ -437,6 +687,74 @@
                   ]
                 ]
               }
+            }
+          },
+          "SignLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "SignLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "apigateway.",
+                    {
+                      "Ref": "AWS::URLSuffix"
+                    }
+                  ]
+                ]
+              },
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "PublishEventSourceMappingKinesisKinesisStream": {
+            "Type": "AWS::Lambda::EventSourceMapping",
+            "DependsOn": "IamRoleLambdaExecution",
+            "Properties": {
+              "BatchSize": 10,
+              "EventSourceArn": {
+                "Fn::GetAtt": [
+                  "KinesisStream",
+                  "Arn"
+                ]
+              },
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "PublishLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "StartingPosition": "TRIM_HORIZON",
+              "Enabled": "True"
             }
           },
           "ProcessEventSourceMappingKinesisKinesisStream": {
@@ -545,13 +863,25 @@
           "IndexLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "IndexLambdaVersionj2PlV70Ued66TFGZK2FItJCLhCnD1lZ1YfXpFE"
+              "Ref": "IndexLambdaVersionKFwajSpS6ooXfddPKJoETr0NwgS0pH5eMFMtzmkXTg"
+            }
+          },
+          "SignLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "SignLambdaVersionTTsVvRn5jD2kSe4w7bczJ3LssUpdCr1rigRIRosYkKg"
+            }
+          },
+          "PublishLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "PublishLambdaVersionPSpx3E7LCS6c8SJsa3oqpcyBCuGO2F3Ix0UFPC8to"
             }
           },
           "ProcessLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ProcessLambdaVersion2vANjooNP7cN7u3AkxSOMeOcoiMsXFHu9iXkj5Cogk"
+              "Ref": "ProcessLambdaVersionefFdaub45s2GORzBSynsfQEPfDhIzNodWi302iD3k"
             }
           },
           "ServiceEndpoint": {
@@ -642,6 +972,72 @@
         "runtime": "nodejs6.10",
         "vpc": {}
       },
+      "sign": {
+        "handler": "sign.handler",
+        "events": [
+          {
+            "http": {
+              "method": "get",
+              "path": "demo/sign",
+              "authorizer": {
+                "name": "1_1NS2V20Gy",
+                "arn": "arn:aws:cognito-idp:ap-northeast-1:#{AWS::AccountId}:userpool/ap-northeast-1_1NS2V20Gy",
+                "resultTtlInSeconds": 300,
+                "identitySource": "method.request.header.Authorization",
+                "claims": []
+              },
+              "cors": {
+                "origins": [
+                  "*"
+                ],
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "environment": {
+          "IOT_AWS_REGION": "ap-northeast-1"
+        },
+        "name": "serverless-api-dev-sign",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs6.10",
+        "vpc": {}
+      },
+      "publish": {
+        "handler": "publish.handler",
+        "events": [
+          {
+            "stream": {
+              "type": "kinesis",
+              "arn": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"IamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][4][\"Resource\"][0]"
+              }
+            }
+          }
+        ],
+        "name": "serverless-api-dev-publish",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs6.10",
+        "vpc": {}
+      },
       "process": {
         "handler": "process.handler",
         "events": [
@@ -649,7 +1045,7 @@
             "stream": {
               "type": "kinesis",
               "arn": {
-                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"IamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][3][\"Resource\"][0]"
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"IamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][5][\"Resource\"][0]"
               }
             }
           }
@@ -745,7 +1141,7 @@
     "artifact": "/Users/musashi.sakamoto/Desktop/serverless-template/api/.serverless/serverless-api.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/serverless-api/dev/1536569592521-2018-09-10T08:53:12.521Z",
+    "artifactDirectoryName": "serverless/serverless-api/dev/1536654814335-2018-09-11T08:33:34.335Z",
     "artifact": "serverless-api.zip"
   }
 }

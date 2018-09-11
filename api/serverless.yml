@@ -1,8 +1,4 @@
 service: serverless-api
-
-package:
-  exclude:
-    - node_modules/**
   
 plugins:
   - serverless-pseudo-parameters
@@ -14,6 +10,7 @@ provider:
   region: ap-northeast-1
   environment:
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    IOT_ENDPOINT_HOST: 'a1oyblg053arn8.iot.ap-northeast-1.amazonaws.com'
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -24,6 +21,13 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+    - Effect: Allow
+      Action:
+        - iot:Connect
+        - iot:Publish
+        - iot:Subscribe
+        - iot:Receive
+      Resource: "*"
 
 functions:
   index:
@@ -35,6 +39,26 @@ functions:
           authorizer:
             arn: "arn:aws:cognito-idp:${self:provider.region}:#{AWS::AccountId}:userpool/${cf:serverless-cognito-dev.UserPoolId}"
           cors: true
+
+  sign:
+    handler: sign.handler
+    events:
+      - http:
+          method: get
+          path: demo/sign
+          authorizer:
+            arn: "arn:aws:cognito-idp:${self:provider.region}:#{AWS::AccountId}:userpool/${cf:serverless-cognito-dev.UserPoolId}"
+          cors: true
+    environment:
+      IOT_AWS_REGION: 'ap-northeast-1'
+  
+  publish:
+    handler: publish.handler
+    events:
+      - stream:
+          type: kinesis
+          arn:
+            Fn::GetAtt: [KinesisStream, Arn]
 
   process:
     handler: process.handler
