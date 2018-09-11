@@ -1,0 +1,257 @@
+{
+  "service": {
+    "service": "serverless-cognito",
+    "serviceObject": {
+      "name": "serverless-cognito"
+    },
+    "provider": {
+      "stage": "dev",
+      "region": "ap-northeast-1",
+      "variableSyntax": "\\${([ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}",
+      "name": "aws",
+      "runtime": "nodejs6.10",
+      "versionFunctions": true,
+      "remoteFunctionData": null,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket"
+          },
+          "UserPool": {
+            "Type": "AWS::Cognito::UserPool",
+            "Properties": {
+              "Schema": [
+                {
+                  "Name": "email",
+                  "StringAttributeConstraints": {
+                    "MinLength": "0",
+                    "MaxLength": "2048"
+                  },
+                  "Required": true,
+                  "AttributeDataType": "String",
+                  "Mutable": true
+                }
+              ],
+              "AliasAttributes": [
+                "email"
+              ],
+              "AutoVerifiedAttributes": [
+                "email"
+              ],
+              "EmailVerificationSubject": "Your verification code",
+              "EmailVerificationMessage": "Your confirmation code is {####}.",
+              "MfaConfiguration": "OFF",
+              "UserPoolName": {
+                "Ref": "AWS::StackName"
+              },
+              "Policies": {
+                "PasswordPolicy": {
+                  "RequireLowercase": false,
+                  "RequireSymbols": false,
+                  "RequireNumbers": true,
+                  "MinimumLength": 6,
+                  "RequireUppercase": false
+                }
+              }
+            }
+          },
+          "UserPoolClient": {
+            "Type": "AWS::Cognito::UserPoolClient",
+            "Properties": {
+              "ClientName": {
+                "Ref": "AWS::StackName"
+              },
+              "GenerateSecret": false,
+              "UserPoolId": {
+                "Ref": "UserPool"
+              }
+            }
+          },
+          "UserIdentityPool": {
+            "Type": "AWS::Cognito::IdentityPool",
+            "Properties": {
+              "IdentityPoolName": "MyIdentityPool",
+              "AllowUnauthenticatedIdentities": true,
+              "CognitoIdentityProviders": [
+                {
+                  "ClientId": {
+                    "Ref": "UserPoolClient"
+                  },
+                  "ProviderName": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "cognito-idp.",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ".amazonaws.com/",
+                        {
+                          "Ref": "UserPool"
+                        }
+                      ]
+                    ]
+                  },
+                  "ServerSideTokenCheck": false
+                }
+              ]
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            }
+          },
+          "UserPoolId": {
+            "Description": "The name of the user pool",
+            "Value": {
+              "Ref": "UserPool"
+            }
+          },
+          "UserPoolClientId": {
+            "Description": "The name of the user pool client",
+            "Value": {
+              "Ref": "UserPoolClient"
+            }
+          },
+          "MyIdentityPool": {
+            "Description": "Identity Pool ID",
+            "Value": {
+              "Ref": "UserIdentityPool"
+            }
+          }
+        }
+      },
+      "coreCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket"
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            }
+          }
+        }
+      }
+    },
+    "pluginsData": {},
+    "functions": {},
+    "resources": {
+      "Resources": {
+        "UserPool": {
+          "Type": "AWS::Cognito::UserPool",
+          "Properties": {
+            "Schema": [
+              {
+                "Name": "email",
+                "StringAttributeConstraints": {
+                  "MinLength": "0",
+                  "MaxLength": "2048"
+                },
+                "Required": true,
+                "AttributeDataType": "String",
+                "Mutable": true
+              }
+            ],
+            "AliasAttributes": [
+              "email"
+            ],
+            "AutoVerifiedAttributes": [
+              "email"
+            ],
+            "EmailVerificationSubject": "Your verification code",
+            "EmailVerificationMessage": "Your confirmation code is {####}.",
+            "MfaConfiguration": "OFF",
+            "UserPoolName": {
+              "Ref": "AWS::StackName"
+            },
+            "Policies": {
+              "PasswordPolicy": {
+                "RequireLowercase": false,
+                "RequireSymbols": false,
+                "RequireNumbers": true,
+                "MinimumLength": 6,
+                "RequireUppercase": false
+              }
+            }
+          }
+        },
+        "UserPoolClient": {
+          "Type": "AWS::Cognito::UserPoolClient",
+          "Properties": {
+            "ClientName": {
+              "Ref": "AWS::StackName"
+            },
+            "GenerateSecret": false,
+            "UserPoolId": {
+              "Ref": "UserPool"
+            }
+          }
+        },
+        "UserIdentityPool": {
+          "Type": "AWS::Cognito::IdentityPool",
+          "Properties": {
+            "IdentityPoolName": "MyIdentityPool",
+            "AllowUnauthenticatedIdentities": true,
+            "CognitoIdentityProviders": [
+              {
+                "ClientId": {
+                  "Ref": "UserPoolClient"
+                },
+                "ProviderName": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "cognito-idp.",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ".amazonaws.com/",
+                      {
+                        "Ref": "UserPool"
+                      }
+                    ]
+                  ]
+                },
+                "ServerSideTokenCheck": false
+              }
+            ]
+          }
+        }
+      },
+      "Outputs": {
+        "UserPoolId": {
+          "Description": "The name of the user pool",
+          "Value": {
+            "Ref": "UserPool"
+          }
+        },
+        "UserPoolClientId": {
+          "Description": "The name of the user pool client",
+          "Value": {
+            "Ref": "UserPoolClient"
+          }
+        },
+        "MyIdentityPool": {
+          "Description": "Identity Pool ID",
+          "Value": {
+            "Ref": "UserIdentityPool"
+          }
+        }
+      }
+    }
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/serverless-cognito/dev/1536654738653-2018-09-11T08:32:18.653Z",
+    "artifact": ""
+  }
+}

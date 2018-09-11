@@ -30,7 +30,7 @@ resources:
           PasswordPolicy:
             RequireLowercase: false
             RequireSymbols: false
-            RequireNumbers: false
+            RequireNumbers: true 
             MinimumLength: 6
             RequireUppercase: false
     UserPoolClient:
@@ -41,6 +41,22 @@ resources:
         GenerateSecret: false
         UserPoolId:
           Ref: UserPool
+    UserIdentityPool:
+      Type: "AWS::Cognito::IdentityPool"
+      Properties:
+        IdentityPoolName: MyIdentityPool
+        AllowUnauthenticatedIdentities: true
+        CognitoIdentityProviders:
+          - ClientId:
+              Ref: UserPoolClient
+            ProviderName:
+              Fn::Join:
+                - ""
+                - - cognito-idp.
+                  - Ref: "AWS::Region"
+                  - .amazonaws.com/
+                  - Ref: UserPool
+            ServerSideTokenCheck: false
   Outputs:
     UserPoolId:
       Description: 'The name of the user pool'
@@ -50,3 +66,7 @@ resources:
       Description: 'The name of the user pool client'
       Value:
         Ref: UserPoolClient
+    MyIdentityPool:
+      Description: 'Identity Pool ID'
+      Value:
+        Ref: UserIdentityPool
